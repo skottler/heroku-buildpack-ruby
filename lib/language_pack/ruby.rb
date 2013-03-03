@@ -93,6 +93,7 @@ class LanguagePack::Ruby < LanguagePack::Base
         create_database_yml
         install_binaries
         run_assets_precompile_rake_task
+        run_compile_tasks
       end
       super
     end
@@ -684,6 +685,17 @@ params = CGI.parse(uri.query || "")
   # @return [Array] the node.js binary path if we need it or an empty Array
   def add_node_js_binary
     bundler.has_gem?('execjs') ? [NODE_JS_BINARY_PATH] : []
+  end
+
+  def run_compile_tasks
+    tasks = ENV['COMPILE_TASKS']
+    if tasks =~ /\S/
+      puts "Running: rake #{tasks}"
+      pipe("env PATH=$PATH:bin bundle exec rake #{tasks} 2>&1")
+      unless $?.success?
+        error "Compile tasks failed."
+      end
+    end
   end
 
   def run_assets_precompile_rake_task
