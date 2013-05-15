@@ -603,6 +603,8 @@ params = CGI.parse(uri.query || "")
       time = Benchmark.realtime { pipe("env PATH=$PATH:bin bundle exec rake assets:precompile 2>&1") }
       if $?.success?
         puts "Asset precompilation completed (#{"%.2f" % time}s)"
+      else
+        error "Asset precompilation failed"
       end
     end
   end
