@@ -2,7 +2,7 @@ require "fileutils"
 require "tmpdir"
 require 'hatchet/tasks'
 
-S3_BUCKET_NAME  = "heroku-buildpack-ruby"
+S3_BUCKET_NAME  = "heroku-buildpack-rg"
 VENDOR_URL      = "https://s3.amazonaws.com/#{S3_BUCKET_NAME}"
 
 def s3_tools_dir
@@ -62,6 +62,21 @@ def build_ruby_command(name, output, prefix, usr_dir, tmpdir, rubygems = nil)
     "./configure --enable-load-relative --disable-install-doc --prefix #{prefix}",
     "env CPATH=/tmp/#{usr_dir}/include:\\$CPATH CPPATH=/tmp/#{usr_dir}/include:\\$CPPATH LIBRARY_PATH=/tmp/#{usr_dir}/lib:\\$LIBRARY_PATH make",
     "make install"
+  ]
+  build_command << "#{prefix}/bin/ruby /tmp/#{usr_dir}/rubygems-#{rubygems}/setup.rb" if rubygems
+  build_command << "mv #{prefix} /app/vendor/#{output}" if prefix != "/app/vendor/#{output}"
+  build_command = build_command.join(" && ")
+
+  sh "vulcan build -v -o #{output}.tgz --prefix #{vulcan_prefix} --source #{name} --command=\"#{build_command}\""
+  s3_upload(tmpdir, output)
+end
+
+def build_ree_command(name, output, prefix, usr_dir, tmpdir, rubygems = nil)
+  vulcan_prefix = "/app/vendor/#{output}"
+  build_command = [
+    "mv #{usr_dir} /tmp",
+    "mkdir -p #{prefix}",
+    "./installer --auto #{prefix} --dont-install-useful-gems --no-dev-docs"
   ]
   build_command << "#{prefix}/bin/ruby /tmp/#{usr_dir}/rubygems-#{rubygems}/setup.rb" if rubygems
   build_command << "mv #{prefix} /app/vendor/#{output}" if prefix != "/app/vendor/#{output}"
@@ -182,6 +197,39 @@ task "ruby:install", :version do |t, args|
         output  = "ruby-build-#{version}"
         prefix  = "/tmp/ruby-#{version}"
         build_ruby_command(full_name, output, prefix, usr_dir, tmpdir, rubygems)
+      end
+    end
+  end
+end
+
+desc "install ree"
+task "ree:install", :version do |t, args|
+  full_version   = args[:version] || '1.8.7-2012.02'
+  full_name      = "ruby-enterprise-#{full_version}"
+  version        = '1.8.7'
+  major_ruby     = '1.8'
+  rubygems       = '1.8.24'
+  name           = "ruby-#{version}"
+  usr_dir        = "usr"
+  Dir.mktmpdir("ruby-") do |tmpdir|
+    Dir.chdir(tmpdir) do |dir|
+      FileUtils.rm_rf("#{tmpdir}/*")
+
+      sh "curl https://rubyenterpriseedition.googlecode.com/files/ruby-enterprise-#{full_version}.tar.gz -s -o - | tar zxf -"
+      FileUtils.mkdir_p("#{full_name}/#{usr_dir}")
+      Dir.chdir("#{full_name}/#{usr_dir}") do
+        sh "curl http://production.cf.rubygems.org/rubygems/rubygems-#{rubygems}.tgz -s -o - | tar xzf -" if major_ruby == "1.8"
+      end
+
+      # runtime ruby
+      prefix  = "/app/vendor/#{name}"
+      build_ree_command(full_name, name, prefix, usr_dir, tmpdir, rubygems)
+
+      # build ruby
+      if major_ruby == "1.8"
+        output  = "ruby-build-#{version}"
+        prefix  = "/tmp/ruby-#{version}"
+        build_ree_command(full_name, output, prefix, usr_dir, tmpdir, rubygems)
       end
     end
   end

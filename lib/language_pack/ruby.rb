@@ -83,6 +83,7 @@ class LanguagePack::Ruby < LanguagePack::Base
       create_database_yml
       install_binaries
       run_assets_precompile_rake_task
+      run_compile_tasks
     end
   end
 
@@ -595,6 +596,17 @@ params = CGI.parse(uri.query || "")
     gem_is_bundled?('execjs') ? [NODE_JS_BINARY_PATH] : []
   end
 
+  def run_compile_tasks
+    tasks = ENV['COMPILE_TASKS']
+    if tasks =~ /\S/
+      puts "Running: rake #{tasks}"
+      pipe("env PATH=$PATH:bin bundle exec rake #{tasks} 2>&1")
+      unless $?.success?
+        error "Compile tasks failed."
+      end
+    end
+  end
+
   def run_assets_precompile_rake_task
     if rake_task_defined?("assets:precompile")
       require 'benchmark'
@@ -603,6 +615,8 @@ params = CGI.parse(uri.query || "")
       time = Benchmark.realtime { pipe("env PATH=$PATH:bin bundle exec rake assets:precompile 2>&1") }
       if $?.success?
         puts "Asset precompilation completed (#{"%.2f" % time}s)"
+      else
+        error "Asset precompilation failed"
       end
     end
   end
