@@ -93,6 +93,7 @@ class LanguagePack::Ruby < LanguagePack::Base
         create_database_yml
         install_binaries
         run_assets_precompile_rake_task
+        run_assets_sync_rake_task
         run_compile_tasks
       end
       super
@@ -666,6 +667,20 @@ params = CGI.parse(uri.query || "")
     env("DATABASE_URL") if env("DATABASE_URL")
   end
 
+  def run_rake_task_when_defined(task, description)
+    if rake_task_defined?(task)
+      require 'benchmark'
+
+      topic "Running: rake #{task}"
+      time = Benchmark.realtime { pipe("env PATH=$PATH:bin bundle exec rake #{task} 2>&1") }
+      if $?.success?
+        puts "#{description} completed (#{"%.2f" % time}s)"
+      else
+        error "#{description} failed"
+      end
+    end
+  end
+
   # executes the block with GIT_DIR environment variable removed since it can mess with the current working directory git thinks it's in
   # @param [block] block to be executed in the GIT_DIR free context
   def allow_git(&blk)
@@ -699,19 +714,11 @@ params = CGI.parse(uri.query || "")
   end
 
   def run_assets_precompile_rake_task
-    instrument 'ruby.run_assets_precompile_rake_task' do
+    run_rake_task_when_defined('assets:precompile', 'Asset precompilation')
+  end
 
-      precompile = rake.task("assets:precompile")
-      return true unless precompile.is_defined?
-
-      topic "Precompiling assets"
-      precompile.invoke(env: rake_env)
-      if precompile.success?
-        puts "Asset precompilation completed (#{"%.2f" % precompile.time}s)"
-      else
-        precompile_fail(precompile.output)
-      end
-    end
+  def run_assets_sync_rake_task
+    run_rake_task_when_defined('assets:sync', 'Asset sync')
   end
 
   def precompile_fail(output)
