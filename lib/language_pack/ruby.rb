@@ -581,7 +581,7 @@ params = CGI.parse(uri.query || "")
       require 'benchmark'
 
       topic "Running: rake #{task}"
-      time = Benchmark.realtime { pipe("env PATH=$PATH:bin bundle exec rake #{task} 2>&1") }
+      time = Benchmark.realtime { pipe("env PATH=$PATH:bin bundle exec rake #{task} --trace 2>&1") }
       if $?.success?
         puts "#{description} completed (#{"%.2f" % time}s)"
       else
@@ -615,7 +615,7 @@ params = CGI.parse(uri.query || "")
     tasks = ENV['COMPILE_TASKS']
     if tasks =~ /\S/
       puts "Running: rake #{tasks}"
-      pipe("env PATH=$PATH:bin bundle exec rake #{tasks} 2>&1")
+      pipe("env PATH=$PATH:bin bundle exec rake #{tasks} --trace 2>&1")
       unless $?.success?
         error "Compile tasks failed."
       end
