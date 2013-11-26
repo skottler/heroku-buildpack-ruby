@@ -215,7 +215,15 @@ task "ree:install", :version do |t, args|
     Dir.chdir(tmpdir) do |dir|
       FileUtils.rm_rf("#{tmpdir}/*")
 
-      sh "curl https://rubyenterpriseedition.googlecode.com/files/ruby-enterprise-#{full_version}.tar.gz -s -o - | tar zxf -"
+      sh "curl https://rubyenterpriseedition.googlecode.com/files/#{full_name}.tar.gz -s -o - | tar zxf -"
+
+      Dir.chdir("#{full_name}/source") do |source_dir|
+        sh "curl -o 34ba44f94a62c63ddf02a045b6f4edcd6eab4989.patch https://github.com/RapGenius/rubyenterpriseedition187-330/commit/34ba44f94a62c63ddf02a045b6f4edcd6eab4989.patch"
+        sh "curl -o 5384967a015be227e16af7a332a50d45e14ed0ad.patch https://github.com/RapGenius/rubyenterpriseedition187-330/commit/5384967a015be227e16af7a332a50d45e14ed0ad.patch"
+        sh "patch -p1 <34ba44f94a62c63ddf02a045b6f4edcd6eab4989.patch"
+        sh "patch -p1 <5384967a015be227e16af7a332a50d45e14ed0ad.patch"
+      end
+
       FileUtils.mkdir_p("#{full_name}/#{usr_dir}")
       Dir.chdir("#{full_name}/#{usr_dir}") do
         sh "curl http://production.cf.rubygems.org/rubygems/rubygems-#{rubygems}.tgz -s -o - | tar xzf -" if major_ruby == "1.8"
