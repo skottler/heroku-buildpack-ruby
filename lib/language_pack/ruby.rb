@@ -93,7 +93,6 @@ class LanguagePack::Ruby < LanguagePack::Base
         create_database_yml
         install_binaries
         run_assets_precompile_rake_task
-        run_assets_sync_rake_task
         run_compile_tasks
       end
       super
@@ -715,10 +714,6 @@ params = CGI.parse(uri.query || "")
 
   def run_assets_precompile_rake_task
     run_rake_task_when_defined('assets:precompile', 'Asset precompilation')
-  end
-
-  def run_assets_sync_rake_task
-    run_rake_task_when_defined('assets:sync', 'Asset sync')
   end
 
   def precompile_fail(output)
