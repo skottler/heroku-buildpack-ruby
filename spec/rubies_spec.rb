@@ -18,7 +18,7 @@ describe "Ruby Versions" do
   end
 
   it "should deploy ruby 1.9.2 properly (git)" do
-    Hatchet::GitApp.new("mri_192", buildpack: git_repo).deploy do |app|
+    Hatchet::GitApp.new("mri_192", :buildpack => git_repo).deploy do |app|
       version = '1.9.2'
       expect(app.output).to match(version)
       expect(app.run('ruby -v')).to match(version)

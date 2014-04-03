@@ -122,7 +122,7 @@ namespace :buildpack do
   def latest_release
     @latest_release ||= begin
       buildpack_name = "heroku/ruby"
-      response = connection.get(path: "buildpacks/#{buildpack_name}/revisions")
+      response = connection.get(:path => "buildpacks/#{buildpack_name}/revisions")
       releases = JSON.parse(response.body)
 
       # {
@@ -217,7 +217,7 @@ FILE
   desc "stage a tarball of the buildpack"
   task :stage do
     Dir.mktmpdir("heroku-buildpack-ruby") do |tmpdir|
-      Git.clone(File.expand_path("."), 'heroku-buildpack-ruby', path: tmpdir)
+      Git.clone(File.expand_path("."), 'heroku-buildpack-ruby', :path => tmpdir)
       Dir.chdir(tmpdir) do |dir|
         streamer = lambda do |chunk, remaining_bytes, total_bytes|
           File.open("ruby.tgz", "w") {|file| file.print(chunk) }
@@ -264,7 +264,7 @@ FILE
   task :publish do
     buildpack_name = "heroku/ruby"
     puts "Publishing #{buildpack_name} buildpack"
-    resp = connection.post(multipart_form_data("buildpacks/buildpack.tgz").merge(path: "/buildpacks/#{buildpack_name}"))
+    resp = connection.post(multipart_form_data("buildpacks/buildpack.tgz").merge(:path => "/buildpacks/#{buildpack_name}"))
     puts resp.status
     puts resp.body
   end

@@ -16,13 +16,8 @@ module LanguagePack
     LEGACY_VERSION_NUMBER  = "1.9.2"
     LEGACY_VERSION         = "ruby-#{LEGACY_VERSION_NUMBER}"
     RUBY_VERSION_REGEX     = %r{
-        (?<ruby_version>\d+\.\d+\.\d+){0}
-        (?<patchlevel>p\d+){0}
-        (?<engine>\w+){0}
-        (?<engine_version>.+){0}
-
-        ruby-\g<ruby_version>(-\g<patchlevel>)?(-\g<engine>-\g<engine_version>)?
-      }x
+      ruby-(\d+\.\d+\.\d+)(?:-(p\d+))?(?:-(\w+)-(.+))?
+    }x
 
     attr_reader :set, :version, :version_without_patchlevel, :patchlevel, :engine, :ruby_version, :engine_version
     include LanguagePack::ShellHelpers
@@ -115,10 +110,10 @@ module LanguagePack
     def parse_version
       md = RUBY_VERSION_REGEX.match(version)
       raise BadVersionError.new("'#{version}' is not valid") unless md
-      @ruby_version   = md[:ruby_version]
-      @patchlevel     = md[:patchlevel]
-      @engine_version = md[:engine_version] || @ruby_version
-      @engine         = (md[:engine]        || :ruby).to_sym
+      @ruby_version   = md[1]
+      @patchlevel     = md[2]
+      @engine_version = md[4] || @ruby_version
+      @engine         = (md[3] || :ruby).to_sym
     end
   end
 end

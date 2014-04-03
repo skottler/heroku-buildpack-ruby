@@ -176,8 +176,8 @@ private
       last_version      = @metadata.read(last_version_file).chomp if @metadata.exists?(last_version_file)
 
       @ruby_version = LanguagePack::RubyVersion.new(bundler,
-        is_new:       new_app,
-        last_version: last_version)
+        :is_new =>       new_app,
+        :last_version => last_version)
       return @ruby_version
     end
   end
@@ -478,7 +478,7 @@ WARNING
         bundle_command << " -j4"
 
         if bundler.windows_gemfile_lock?
-          warn(<<WARNING, inline: true)
+          warn(<<WARNING, :inline => true)
 Removing `Gemfile.lock` because it was generated on Windows.
 Bundler will do a full resolve so native gems are handled properly.
 This may result in unexpected gem versions being used in your app.
@@ -523,7 +523,7 @@ WARNING
           puts "Running: #{bundle_command}"
           instrument "ruby.bundle_install" do
             bundle_time = Benchmark.realtime do
-              bundler_output << pipe("#{bundle_command} --no-clean", out: "2>&1", env: env_vars, user_env: true)
+              bundler_output << pipe("#{bundle_command} --no-clean", :out => "2>&1", :env => env_vars, :user_env => true)
             end
           end
         end
@@ -537,7 +537,7 @@ WARNING
             if load_default_cache?
               run "bundle clean > /dev/null"
             else
-              pipe("#{bundle_bin} clean", out: "2> /dev/null")
+              pipe("#{bundle_bin} clean", :out => "2> /dev/null")
             end
           end
           cache.store ".bundle"
@@ -650,7 +650,7 @@ params = CGI.parse(uri.query || "")
     @rake ||= begin
       LanguagePack::Helpers::RakeRunner.new(
                 bundler.has_gem?("rake") || ruby_version.rake_is_vendored?
-              ).load_rake_tasks!(env: rake_env)
+              ).load_rake_tasks!(:env => rake_env)
     end
   end
 

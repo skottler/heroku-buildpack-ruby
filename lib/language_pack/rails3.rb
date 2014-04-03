@@ -69,7 +69,7 @@ private
 
         topic("Preparing app for Rails asset pipeline")
 
-        precompile.invoke(env: rake_env)
+        precompile.invoke(:env => rake_env)
 
         if precompile.success?
           log "assets_precompile", :status => "success"

@@ -6,7 +6,13 @@ require 'language_pack/ruby'
 
 module LanguagePack
   module Instrument
-    def self.bench_msg(message, level = 0, start_time, end_time, duration, build_id, buildpack_version)
+    def self.bench_msg(message, *args)
+      buildpack_version = args.pop
+      build_id = args.pop
+      duration = args.pop
+      end_time = args.pop
+      start_time = args.pop
+      level = args.pop || 0
       out.puts "measure.#{message}.start=#{start_time} measure.#{message}.end=#{end_time} measure.#{message}.duration=#{duration} measure.#{message}.level=#{level} measure.#{message}.build_id=#{build_id} request_id=#{request_id} measure.#{message}.buildpack_version=#{buildpack_version} measure.#{message}.buildpack=#{buildpack_name} "
     end
 
@@ -25,7 +31,7 @@ module LanguagePack
     end
 
     def self.out
-      Thread.current[:out] ||= ENV['LOGPLEX_DEFAULT_TOKEN'] ? Lpxc.new(batch_size: 1) : StringIO.new
+      Thread.current[:out] ||= ENV['LOGPLEX_DEFAULT_TOKEN'] ? Lpxc.new(:batch_size => 1) : StringIO.new
     end
 
     def self.trace(name, *args, &blk)
