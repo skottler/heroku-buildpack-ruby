@@ -521,11 +521,6 @@ WARNING
           env_vars["BUNDLER_LIB_PATH"] = "#{bundler_path}" if ruby_version.ruby_version == "1.8.7"
           puts "Running: #{bundle_command}"
 
-          ENV.each_pair do |var, value|
-            if var =~ /ruby|path|gem/i
-              topic "#{var}=#{value}"
-            end
-          end
           instrument "ruby.bundle_install" do
             bundle_time = Benchmark.realtime do
               bundler_output << pipe("#{bundle_command} --no-clean", out: "2>&1", env: env_vars, user_env: true)
@@ -694,6 +689,11 @@ params = CGI.parse(uri.query || "")
 
   def run_assets_precompile_rake_task
     instrument 'ruby.run_assets_precompile_rake_task' do
+      ENV.each_pair do |var, value|
+        if var =~ /ruby|path|gem/i
+          topic "#{var}=#{value}"
+        end
+      end
 
       precompile = rake.task("assets:precompile")
       return true unless precompile.is_defined?
