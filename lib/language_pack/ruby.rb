@@ -92,6 +92,11 @@ class LanguagePack::Ruby < LanguagePack::Base
         build_bundler
         create_database_yml
         install_binaries
+        ENV.each_pair do |var, value|
+          if var =~ /ruby|path|gem/i
+            puts "#{var}=#{value}"
+          end
+        end
         run_assets_precompile_rake_task
       end
       super
@@ -689,11 +694,6 @@ params = CGI.parse(uri.query || "")
 
   def run_assets_precompile_rake_task
     instrument 'ruby.run_assets_precompile_rake_task' do
-      ENV.each_pair do |var, value|
-        if var =~ /ruby|path|gem/i
-          topic "#{var}=#{value}"
-        end
-      end
 
       precompile = rake.task("assets:precompile")
       return true unless precompile.is_defined?
