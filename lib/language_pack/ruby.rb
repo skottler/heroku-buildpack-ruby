@@ -92,6 +92,7 @@ class LanguagePack::Ruby < LanguagePack::Base
         build_bundler
         create_database_yml
         install_binaries
+        system('pwd')
         ENV.each_pair do |var, value|
           if var =~ /ruby|path|gem/i
             puts "#{var}=#{value}"
