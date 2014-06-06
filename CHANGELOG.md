@@ -1,5 +1,13 @@
 ## Master
 
+## v119 (5/9/2014)
+
+* Temporarily disable default ruby cache
+
+## v118 (5/6/2014)
+
+* Ruby version detection now loads user environment variables
+
 ## v117 (4/14/2014)
 
 Features:

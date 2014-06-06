@@ -175,7 +175,7 @@ private
       last_version      = nil
       last_version      = @metadata.read(last_version_file).chomp if @metadata.exists?(last_version_file)
 
-      @ruby_version = LanguagePack::RubyVersion.new(bundler,
+      @ruby_version = LanguagePack::RubyVersion.new(bundler.ruby_version,
         is_new:       new_app,
         last_version: last_version)
       return @ruby_version
@@ -429,7 +429,7 @@ WARNING
   # loads a default bundler cache for new apps to speed up initial bundle installs
   def load_default_cache
     instrument "ruby.load_default_cache" do
-      if load_default_cache?
+      if false # load_default_cache?
         puts "New app detected loading default bundler cache"
         patchlevel = run("ruby -e 'puts RUBY_PATCHLEVEL'").chomp
         cache_name  = "#{DEFAULT_RUBY_VERSION}-p#{patchlevel}-default-cache"
