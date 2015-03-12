@@ -57,11 +57,8 @@ Dir.mktmpdir("ruby-") do |tmpdir|
     prefix  = "/app/vendor/#{name}"
     build_ree_command(full_name, name, prefix, usr_dir, tmpdir, rubygems)
 
-    # build ruby
-    if major_ruby == "1.8"
-      output  = "ruby-build-#{version}"
-      prefix  = "/tmp/ruby-#{version}"
-      build_ree_command(full_name, output, prefix, usr_dir, tmpdir, rubygems)
+    Dir.chdir("app/vendor/#{name}") do
+      sh "tar -gzvf - ."
     end
   end
 end
