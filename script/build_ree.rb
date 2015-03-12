@@ -1,3 +1,5 @@
+require 'tmpdir'
+
 def build_ree_command(name, output, prefix, usr_dir, tmpdir, rubygems = nil)
   build_command = [
     "mv #{usr_dir} /tmp",
