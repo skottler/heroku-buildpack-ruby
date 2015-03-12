@@ -2,7 +2,7 @@ require 'tmpdir'
 require 'fileutils'
 
 def sh(command)
-  command = "cd #{Dir.pwd} && #{command} 2>&1 >/dev/null"
+  command = "cd #{Dir.pwd} && #{command}"
   puts command
   system command
 end
@@ -17,7 +17,7 @@ def s3_upload(tmpdir, name)
   string_to_sign = "PUT\n\n#{content_type}\n#{date_value}\n/#{s3_bucket_name}/#{platform}/#{name}"
   File.open('/tmp/string_to_sign', 'w') { |f| f << string_to_sign }
   signature = `cat /tmp/string_to_sign | openssl sha1 -hmac #{s3_secret} -binary | base64`
-  sh %(curl -XPUT -T #{tmpdir}/#{name}.tgz -H 'Host: #{s3_bucket_name}.s3.amazonaws.com' -H "Date: #{date_value}" -H "Content-Type: #{content_type}" -H "Authorization: AWS #{s3_key} #{signature}" https://#{s3_bucket_name}.s3.amazonaws.com/#{platform}/#{name}.tgz)
+  sh %(curl -i -XPUT -T #{tmpdir}/#{name}.tgz -H 'Host: #{s3_bucket_name}.s3.amazonaws.com' -H "Date: #{date_value}" -H "Content-Type: #{content_type}" -H "Authorization: AWS #{s3_key} #{signature}" https://#{s3_bucket_name}.s3.amazonaws.com/#{platform}/#{name}.tgz)
 end
 
 def build_ree_command(name, output, prefix, usr_dir, tmpdir, rubygems = nil)
