@@ -2,8 +2,8 @@ require 'tmpdir'
 require 'fileutils'
 
 def sh(command)
-  full_command = "cd #{Dir.pwd} && #{command}"
-  puts full_command
+  full_command = "cd #{Dir.pwd} && #{command} 1>&2"
+  STDERR.puts full_command
   system full_command
 end
 
@@ -25,7 +25,6 @@ def build_ree_command(name, output, prefix, usr_dir, tmpdir, rubygems = nil)
   #s3_upload(tmpdir, output)
 end
 
-$stdout = STDERR
 full_version   = '1.8.7-2012.02'
 full_name      = "ruby-enterprise-#{full_version}"
 version        = '1.8.7'
@@ -59,7 +58,6 @@ Dir.mktmpdir("ruby-") do |tmpdir|
     build_ree_command(full_name, name, prefix, usr_dir, tmpdir, rubygems)
 
     Dir.chdir("app/vendor/#{name}") do
-      $stdout = STDOUT
       sh "tar -cz - ."
     end
   end
