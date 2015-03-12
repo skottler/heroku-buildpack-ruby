@@ -29,7 +29,7 @@ version        = '1.8.7'
 major_ruby     = '1.8'
 rubygems       = '1.8.24'
 name           = "ruby-#{version}"
-usr_dir        = "usr"
+usr_dir        = "#{full_name}/usr"
 
 Dir.mktmpdir("ruby-") do |tmpdir|
   Dir.chdir(tmpdir) do |dir|
@@ -46,8 +46,8 @@ Dir.mktmpdir("ruby-") do |tmpdir|
       sh "patch -p1 <tcmalloc.patch"
     end
 
-    FileUtils.mkdir_p("#{full_name}/#{usr_dir}")
-    Dir.chdir("#{full_name}/#{usr_dir}") do
+    FileUtils.mkdir_p(usr_dir)
+    Dir.chdir(usr_dir) do
       sh "curl http://production.cf.rubygems.org/rubygems/rubygems-#{rubygems}.tgz -s -o - | tar xzf -" if major_ruby == "1.8"
     end
 
