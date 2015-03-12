@@ -34,7 +34,7 @@ def build_ree_command(name, output, prefix, usr_dir, tmpdir, rubygems = nil)
     sh build_command
   end
 
-  Dir.chdir("/app/vendor/#{output}") do
+  Dir.chdir(prefix) do
     sh "tar -cjvf #{tmpdir}/#{output}.tgz ."
   end
 
@@ -72,9 +72,5 @@ Dir.mktmpdir("ruby-") do |tmpdir|
     # runtime ruby
     prefix  = "/app/vendor/#{name}"
     build_ree_command(full_name, name, prefix, usr_dir, tmpdir, rubygems)
-
-    Dir.chdir("app/vendor/#{name}") do
-      sh "tar -cz - ."
-    end
   end
 end
