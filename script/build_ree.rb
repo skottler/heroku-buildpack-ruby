@@ -1,9 +1,7 @@
 require 'tmpdir'
 require 'fileutils'
 
-def sh(*args, &block)
-  FileUtils.sh(*args, &block)
-end
+include FileUtils
 
 def build_ree_command(name, output, prefix, usr_dir, tmpdir, rubygems = nil)
   build_command = [
