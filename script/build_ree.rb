@@ -10,6 +10,8 @@ def build_ree_command(name, output, prefix, usr_dir, tmpdir, rubygems = nil)
   build_command << "mv #{prefix} /app/vendor/#{output}" if prefix != "/app/vendor/#{output}"
   build_command = build_command.join(" && ")
 
+  system build_command
+
   #sh "vulcan build -v -o #{output}.tgz --prefix #{vulcan_prefix} --source #{name} --command=\"#{build_command}\""
   #s3_upload(tmpdir, output)
 end
