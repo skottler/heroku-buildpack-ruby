@@ -16,7 +16,7 @@ def s3_upload(tmpdir, name)
   content_type = "application/x-gzip"
   content_length = File.size("#{tmpdir}/#{name}.tgz")
   string_to_sign = "PUT\n\n#{content_type}\n#{date_value}\n/#{s3_bucket_name}/#{platform}/#{name}.tgz"
-  File.open('/tmp/string_to_sign', 'w') { |f| f << string_to_sign }
+  File.open('/tmp/string_to_sign', 'w') { |f| f.puts(string_to_sign) }
   signature = `cat /tmp/string_to_sign | openssl sha1 -hmac #{s3_secret} -binary | base64`.chomp
   sh %(curl -i -XPUT -T #{tmpdir}/#{name}.tgz -H 'Host: #{s3_bucket_name}.s3.amazonaws.com' -H "Date: #{date_value}" -H "Content-Type: #{content_type}" -H "Authorization: AWS #{s3_key}:#{signature}" https://#{s3_bucket_name}.s3.amazonaws.com/#{platform}/#{name}.tgz)
 end
