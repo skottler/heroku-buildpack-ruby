@@ -14,7 +14,7 @@ def s3_upload(tmpdir, name)
   platform = ENV.fetch('HEROKU_PLATFORM')
   date_value = `date -R`
   content_type = "application/x-gzip"
-  content_length = File.size("#{tmpdir}/#{name}")
+  content_length = File.size("#{tmpdir}/#{name}.tgz")
   string_to_sign = "PUT\n\n#{content_type}\n#{date_value}\n/#{s3_bucket_name}/#{platform}/#{name}"
   File.open('/tmp/string_to_sign', 'w') { |f| f << string_to_sign }
   signature = `cat /tmp/string_to_sign | openssl sha1 -hmac #{s3_secret} -binary | base64`
