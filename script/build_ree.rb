@@ -17,7 +17,9 @@ def build_ree_command(name, output, prefix, usr_dir, tmpdir, rubygems = nil)
   build_command << "mv #{prefix} /app/vendor/#{output}" if prefix != "/app/vendor/#{output}"
   build_command = build_command.join(" && ")
 
-  sh build_command
+  Dir.chdir(name) do
+    sh build_command
+  end
 
   #sh "vulcan build -v -o #{output}.tgz --prefix #{vulcan_prefix} --source #{name} --command=\"#{build_command}\""
   #s3_upload(tmpdir, output)
@@ -29,7 +31,7 @@ version        = '1.8.7'
 major_ruby     = '1.8'
 rubygems       = '1.8.24'
 name           = "ruby-#{version}"
-usr_dir        = "#{full_name}/usr"
+usr_dir        = "usr"
 
 Dir.mktmpdir("ruby-") do |tmpdir|
   Dir.chdir(tmpdir) do |dir|
@@ -46,8 +48,8 @@ Dir.mktmpdir("ruby-") do |tmpdir|
       sh "patch -p1 <tcmalloc.patch"
     end
 
-    FileUtils.mkdir_p(usr_dir)
-    Dir.chdir(usr_dir) do
+    FileUtils.mkdir_p("#{full_name}/#{usr_dir}")
+    Dir.chdir("#{full_name}/#{usr_dir}") do
       sh "curl http://production.cf.rubygems.org/rubygems/rubygems-#{rubygems}.tgz -s -o - | tar xzf -" if major_ruby == "1.8"
     end
 
