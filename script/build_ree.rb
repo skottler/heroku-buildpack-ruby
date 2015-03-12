@@ -38,7 +38,7 @@ def build_ree_command(name, output, prefix, usr_dir, tmpdir, rubygems = nil)
 
   Dir.chdir(prefix) do
     puts '-----BEGINTARBALL------'
-    sh "tar -czf - ."
+    sh "tar -cf - . | gzip -f"
   end
 end
 
