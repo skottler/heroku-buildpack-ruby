@@ -7,18 +7,17 @@ def sh(command)
   system command
 end
 
+def install_s3
+  Dir.chdir('/tmp') do
+    sh "curl -o s3 https://raw.githubusercontent.com/Genius/heroku-buildpack-ruby/build_script/support/s3/s3"
+    sh "chmod -v a+x s3"
+  end
+end
+
 def s3_upload(tmpdir, name)
   s3_bucket_name = ENV.fetch('S3_BUCKET_NAME')
-  s3_key = ENV.fetch('S3_KEY')
-  s3_secret = ENV.fetch('S3_SECRET')
   platform = ENV.fetch('HEROKU_PLATFORM')
-  date_value = `date -R`.chomp
-  content_type = "application/x-gzip"
-  content_length = File.size("#{tmpdir}/#{name}.tgz")
-  string_to_sign = "PUT\n\n#{content_type}\n#{date_value}\n/#{s3_bucket_name}/#{platform}/#{name}.tgz"
-  File.open('/tmp/string_to_sign', 'w') { |f| f.puts(string_to_sign) }
-  signature = `cat /tmp/string_to_sign | openssl sha1 -hmac #{s3_secret} -binary | base64`.chomp
-  sh %(curl -i -XPUT -T #{tmpdir}/#{name}.tgz -H 'Host: #{s3_bucket_name}.s3.amazonaws.com' -H "Date: #{date_value}" -H "Content-Type: #{content_type}" -H "Authorization: AWS #{s3_key}:#{signature}" https://#{s3_bucket_name}.s3.amazonaws.com/#{platform}/#{name}.tgz)
+  sh "/tmp/s3 put #{s3_bucket_name} #{platform}/#{name}.tgz #{tmpdir}/#{name}.tgz"
 end
 
 def build_ree_command(name, output, prefix, usr_dir, tmpdir, rubygems = nil)
