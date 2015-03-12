@@ -25,6 +25,7 @@ def build_ree_command(name, output, prefix, usr_dir, tmpdir, rubygems = nil)
   #s3_upload(tmpdir, output)
 end
 
+$stdout = STDERR
 full_version   = '1.8.7-2012.02'
 full_name      = "ruby-enterprise-#{full_version}"
 version        = '1.8.7'
@@ -58,7 +59,8 @@ Dir.mktmpdir("ruby-") do |tmpdir|
     build_ree_command(full_name, name, prefix, usr_dir, tmpdir, rubygems)
 
     Dir.chdir("app/vendor/#{name}") do
-      sh "tar -gzvf - ."
+      $stdout = STDOUT
+      sh "tar -cz - ."
     end
   end
 end
