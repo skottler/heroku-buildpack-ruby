@@ -15,6 +15,8 @@ def install_s3
 end
 
 def s3_upload(tmpdir, name)
+  install_s3
+
   s3_bucket_name = ENV.fetch('S3_BUCKET_NAME')
   platform = ENV.fetch('HEROKU_PLATFORM')
   sh "/tmp/s3 put #{s3_bucket_name} #{platform}/#{name}.tgz #{tmpdir}/#{name}.tgz"
