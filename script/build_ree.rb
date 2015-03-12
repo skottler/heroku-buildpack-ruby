@@ -34,7 +34,7 @@ def build_ree_command(name, output, prefix, usr_dir, tmpdir, rubygems = nil)
     sh build_command
   end
 
-  Dir.chdir("app/vendor/#{output}") do
+  Dir.chdir("/app/vendor/#{output}") do
     sh "tar -cjvf #{tmpdir}/#{output}.tgz ."
   end
 
