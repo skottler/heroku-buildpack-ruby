@@ -7,19 +7,14 @@ def sh(command)
   system command
 end
 
-def install_s3
-  Dir.chdir('/tmp') do
-    sh "curl -o s3 https://raw.githubusercontent.com/Genius/heroku-buildpack-ruby/build_script/support/s3/s3"
-    sh "chmod -v a+x s3"
-  end
-end
-
 def s3_upload(tmpdir, name)
-  install_s3
-
   s3_bucket_name = ENV.fetch('S3_BUCKET_NAME')
+  s3_key = ENV.fetch('S3_KEY')
+  s3_secret = ENV.fetch('S3_SECRET')
   platform = ENV.fetch('HEROKU_PLATFORM')
-  sh "/tmp/s3 put #{s3_bucket_name} #{platform}/#{name}.tgz #{tmpdir}/#{name}.tgz"
+  content_type = "application/x-gzip"
+  signature = `cat /tmp/string_to_sign | openssl sha1 -hmac #{s3_secret} -binary | base64`.chomp
+  sh %(curl -i -XPUT -T #{tmpdir}/#{name}.tgz -H 'Host: #{s3_bucket_name}.s3.amazonaws.com' -H "Content-Type: #{content_type}" https://#{s3_bucket_name}.s3.amazonaws.com/#{platform}/#{name}.tgz)
 end
 
 def build_ree_command(name, output, prefix, usr_dir, tmpdir, rubygems = nil)
@@ -37,9 +32,10 @@ def build_ree_command(name, output, prefix, usr_dir, tmpdir, rubygems = nil)
   end
 
   Dir.chdir(prefix) do
-    puts '-----BEGINTARBALL------'
-    sh "tar -cf - . | gzip -f"
+    sh "tar -cjvf #{tmpdir}/#{output}.tgz ."
   end
+
+  s3_upload(tmpdir, output)
 end
 
 full_version   = '1.8.7-2012.02'
