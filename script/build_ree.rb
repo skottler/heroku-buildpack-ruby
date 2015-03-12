@@ -1,7 +1,9 @@
 require 'tmpdir'
 require 'fileutils'
 
-include FileUtils
+def sh(command)
+  system "cd #{Dir.pwd} && #{command}"
+end
 
 def build_ree_command(name, output, prefix, usr_dir, tmpdir, rubygems = nil)
   build_command = [
