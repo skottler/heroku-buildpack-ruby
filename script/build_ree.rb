@@ -2,9 +2,7 @@ require 'tmpdir'
 require 'fileutils'
 
 def sh(command)
-  full_command = "cd #{Dir.pwd} && #{command} 1>&2"
-  STDERR.puts full_command
-  system full_command
+  system "cd #{Dir.pwd} && #{command} 2>&1 >/dev/null"
 end
 
 def build_ree_command(name, output, prefix, usr_dir, tmpdir, rubygems = nil)
