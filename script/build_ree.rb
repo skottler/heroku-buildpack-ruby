@@ -37,10 +37,9 @@ def build_ree_command(name, output, prefix, usr_dir, tmpdir, rubygems = nil)
   end
 
   Dir.chdir(prefix) do
-    sh "tar -cjvf #{tmpdir}/#{output}.tgz ."
+    puts '-----BEGINTARBALL------'
+    sh "tar -cz ."
   end
-
-  s3_upload(tmpdir, output)
 end
 
 full_version   = '1.8.7-2012.02'
