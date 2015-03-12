@@ -2,7 +2,22 @@ require 'tmpdir'
 require 'fileutils'
 
 def sh(command)
-  system "cd #{Dir.pwd} && #{command} 2>&1 >/dev/null"
+  command = "cd #{Dir.pwd} && #{command} 2>&1 >/dev/null"
+  puts command
+  system command
+end
+
+def s3_upload(tmpdir, name)
+  s3_bucket_name = ENV.fetch('S3_BUCKET_NAME')
+  s3_key = ENV.fetch('S3_KEY')
+  s3_secret = ENV.fetch('S3_SECRET')
+  platform = ENV.fetch('HEROKU_PLATFORM')
+  date_value = `date -R`
+  content_type = "application/x-gzip"
+  string_to_sign = "PUT\n\n#{content_type}\n#{date_value}\n/#{s3_bucket_name}/#{platform}/#{name}"
+  File.open('/tmp/string_to_sign', 'w') { |f| f << string_to_sign }
+  signature = `cat /tmp/string_to_sign | openssl sha1 -hmac #{s3_secret} -binary | base64`
+  sh %(curl -XPUT -T #{tmpdir}/#{name}.tgz -H 'Host: #{s3_bucket_name}.s3.amazonaws.com' -H "Date: #{date_value}" -H "Content-Type: #{content_type}" -H "Authorization: AWS #{s3_key} #{signature}" https://#{s3_bucket_name}.s3.amazonaws.com/#{platform}/#{name}.tgz)
 end
 
 def build_ree_command(name, output, prefix, usr_dir, tmpdir, rubygems = nil)
@@ -19,8 +34,11 @@ def build_ree_command(name, output, prefix, usr_dir, tmpdir, rubygems = nil)
     sh build_command
   end
 
-  #sh "vulcan build -v -o #{output}.tgz --prefix #{vulcan_prefix} --source #{name} --command=\"#{build_command}\""
-  #s3_upload(tmpdir, output)
+  Dir.chdir("app/vendor/#{output}") do
+    sh "tar -cjvf #{tmpdir}/#{output}.tgz ."
+  end
+
+  s3_upload(tmpdir, output)
 end
 
 full_version   = '1.8.7-2012.02'
