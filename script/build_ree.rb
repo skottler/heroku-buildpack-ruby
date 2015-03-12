@@ -10,7 +10,6 @@ end
 def s3_upload(tmpdir, name)
   s3_bucket_name = ENV.fetch('S3_BUCKET_NAME')
   content_type = "application/x-gzip"
-  signature = `cat /tmp/string_to_sign | openssl sha1 -hmac #{s3_secret} -binary | base64`.chomp
   sh %(curl -i -XPUT -T #{tmpdir}/#{name}.tgz -H 'Host: #{s3_bucket_name}.s3.amazonaws.com' -H "Content-Type: #{content_type}" https://#{s3_bucket_name}.s3.amazonaws.com/#{name}.tgz)
 end
 
