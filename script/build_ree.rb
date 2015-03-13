@@ -64,6 +64,11 @@ Dir.mktmpdir("ruby-") do |tmpdir|
     prefix = "/tmp/#{name}"
     build_ree_command(full_name, "ruby-build-1.8.7", prefix, usr_dir, tmpdir, rubygems)
 
+    FileUtils.mkdir_p("#{full_name}/#{usr_dir}")
+    Dir.chdir("#{full_name}/#{usr_dir}") do
+      sh "curl http://production.cf.rubygems.org/rubygems/rubygems-#{rubygems}.tgz -s -o - | tar xzf -" if major_ruby == "1.8"
+    end
+
     # runtime ruby
     prefix  = "/app/vendor/#{name}"
     build_ree_command(full_name, name, prefix, usr_dir, tmpdir, rubygems)
