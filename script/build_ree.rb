@@ -15,11 +15,10 @@ end
 
 def build_ree_command(name, output, prefix, usr_dir, tmpdir, rubygems = nil)
   build_command = [
-    "mv #{usr_dir} /tmp",
     "mkdir -p #{prefix}",
     "./installer --auto #{prefix} --dont-install-useful-gems --no-dev-docs"
   ]
-  build_command << "#{prefix}/bin/ruby /tmp/#{usr_dir}/rubygems-#{rubygems}/setup.rb" if rubygems
+  build_command << "#{prefix}/bin/ruby #{usr_dir}/rubygems-#{rubygems}/setup.rb" if rubygems
   build_command = build_command.join(" && ")
 
   Dir.chdir(name) do
@@ -63,11 +62,6 @@ Dir.mktmpdir("ruby-") do |tmpdir|
 
     prefix = "/tmp/#{name}"
     build_ree_command(full_name, "ruby-build-1.8.7", prefix, usr_dir, tmpdir, rubygems)
-
-    FileUtils.mkdir_p("#{full_name}/#{usr_dir}")
-    Dir.chdir("#{full_name}/#{usr_dir}") do
-      sh "curl http://production.cf.rubygems.org/rubygems/rubygems-#{rubygems}.tgz -s -o - | tar xzf -" if major_ruby == "1.8"
-    end
 
     # runtime ruby
     prefix  = "/app/vendor/#{name}"
