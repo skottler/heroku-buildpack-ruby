@@ -14,6 +14,7 @@ def s3_upload(tmpdir, name)
 end
 
 def build_ree_command(name, output, prefix, usr_dir, tmpdir, rubygems = nil)
+  ENV['CFLAGS'] = "-O2 -fno-tree-dce -fno-optimize-sibling-calls"
   build_command = [
     "mkdir -p #{prefix}",
     "./installer --auto #{prefix} --dont-install-useful-gems --no-dev-docs"
